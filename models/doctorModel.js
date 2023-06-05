@@ -15,7 +15,7 @@ const doctorSchema = new mongoose.Schema({
         type:String,
         required:[true,'Phone number is required']
     },
-    emial:{
+    email:{
         type:String,
         required:[true,'Email is required']
     },
@@ -34,16 +34,20 @@ const doctorSchema = new mongoose.Schema({
         type:String,
         required:[true,'expericance is required']
     },
-    feePerCunsaltaion:{
+    feePerCunsaltation:{
         type:Number,
         required:[true,'fee is required']
     },
-    timing:{
+    status:{
+        type:String,
+        default:'pending'
+    },
+    timings:{
         type:Object,
         required:[true,'Work timing is required']
     }
 },{timestamps:true})
 
 
-const doctorModel = mongoose.model('users',doctorSchema)
+const doctorModel = mongoose.model('doctors',doctorSchema)
 module.exports = doctorModel
