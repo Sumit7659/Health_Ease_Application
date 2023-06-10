@@ -18,15 +18,15 @@ const {user}=useSelector(state=>state.user)
       }})
       dispatch(hideLoading())
       if(res.data.success){
-        message.success(res.data.success)
+        message.success(res.data.message)
         navigate('/')
       }
       else{
         message.error(res.data.success)
       }
     }catch(error){
-      dispatch(hideLoading()),
-      console.log(error),
+      dispatch(hideLoading())
+      console.log(error)
       message.error('Something went Wrong')
     }
     
