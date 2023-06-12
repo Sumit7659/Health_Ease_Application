@@ -2,12 +2,15 @@ const userModel =require("../models/userModels")
 const bcrypt=require("bcryptjs")
 const jwt = require("jsonwebtoken")
 const doctorModel=require('../models/doctorModel')
+const appointmentModel =require('../models/appointmentModel')
+const moment= require('moment')
+
 //register Callback
 const registerController =async(req,res)=>{
     try{
         const exisitingUser=await userModel.findOne({email:req.body.email})
         if(exisitingUser){
-            return res.status(200).send({message:'User alredy Exist',success:false})
+            return res.status(200).send({message:'User Alredy Exist',success:false})
         }
         const password=req.body.password
         const salt = await bcrypt.genSalt(10) 
@@ -28,7 +31,7 @@ const loginController =async(req,res)=>{
     try{
         const user =await userModel.findOne({email:req.body.email})
         if(!user){
-            return res.status(200).send({message:'User not found',success:false})
+            return res.status(200).send({message:'User Not Found',success:false})
         }
         const isMatch= await bcrypt.compare(req.body.password, user.password) 
         if(!isMatch){
@@ -48,7 +51,7 @@ const authController=async(req,res)=>{
         const user= await userModel.findById({_id:req.body.userId})
         user.password= undefined
         if(!user){
-            return res.status(200).send({message:'User not found',success:false})
+            return res.status(200).send({message:'User Not Found',success:false})
         }
         else{
             res.status(200).send({success:true,data:user})
@@ -56,7 +59,7 @@ const authController=async(req,res)=>{
     }
     catch(error){
         console.log(error)
-        res.status(500).send({message:'auth error',success:false,error})
+        res.status(500).send({message:'Auth Error',success:false,error})
     }
 }
 
@@ -69,7 +72,7 @@ const applyDoctorController=async(req,res)=>{
         const notification = adminUser.notification
         notification.push({
             type:'apply-doctor-request',
-            message:`${newDoctor.firstName} ${newDoctor.lastName} Has applied for a doctor Account`,
+            message:`${newDoctor.firstName} ${newDoctor.lastName} has applied for a doctor account`,
             data:{
                 doctorId: newDoctor._id,
                 name:newDoctor.firstName + " " + newDoctor.lastName,
@@ -77,12 +80,12 @@ const applyDoctorController=async(req,res)=>{
             }
         })
         await userModel.findByIdAndUpdate(adminUser._id, {notification})
-        res.status(201).send({success:true,message:'Doctor account applied Successfuly'
+        res.status(201).send({success:true,message:'Doctor Account Applied Successfully'
         })
     }
     catch(error){
         console.log(error)
-        res.status(500).send({success:false,error,message:'Error while applying for Doctor'})
+        res.status(500).send({success:false,error,message:'Error While Applying For Doctor'})
     }
 }
 
@@ -96,11 +99,11 @@ try{
     user.notification=[]
     user.seennotification=notification
     const updatedUser=await user.save()
-    res.status(200).send({success:true,message:'All notification marked as read',data:updatedUser})
+    res.status(200).send({success:true,message:'All Notification Marked As Read',data:updatedUser})
 }
 catch(error){
 console.log(error)
-res.status(500).send({message:'Error in notification',success:false,error})
+res.status(500).send({message:'Error In Notification',success:false,error})
 }
 }
 
@@ -121,9 +124,123 @@ const deleteAllNotificationController=async(req,res)=>{
         console.log(error)
         res.status(500).send({
             success:false,
-            message:'Unable to delete all notifications',
+            message:'Unable To Delete All Notifications',
             error})
     }
 }
 
-module.exports={loginController,registerController,authController,applyDoctorController,getAllNotificationController,deleteAllNotificationController}
+// Get all Doc
+const getallDoctorsCtrl=async(req,res)=>{
+    try{
+        const doctors=await doctorModel.find({status:'approved'})
+        res.status(200).send({
+            success:true,
+            message:'Doctor List Fetched Successfuly',
+            data:doctors 
+        })
+    }
+    catch(error){
+        console.log(error)
+        res.status(500).send({
+            success:false,
+            message:'Error while Fetching Doctor',
+            error
+        })
+    }
+}
+
+//Book Appointment
+const bookAppointmentController=async(req,res)=>{
+    try{
+        req.body.date=moment(req.body.date,'DD-MM-YYYY').toISOString()
+        req.body.time=moment(req.body.time,'HH:mm').toISOString()
+        req.body.status='pending'
+        const newAppointment =new appointmentModel(req.body)
+        await newAppointment.save()
+        const user= await userModel.findOne({_id:req.body.doctorInfo.userId})
+        user.notification.push({
+            type:'New-Appointment-request',
+            message:`A New Appointment Request from ${req.body.userInfo.name}`,
+            onClickPath:'/user/appointments'  
+        })
+        await user.save()
+        res.status(200).send({
+            success:true,
+            message:'Appointment Book Successfully'
+        })
+    }
+    catch(error){
+        console.log(error)
+        res.status(500).send({
+            success:false,
+            message:'Error While Booking Appointment',
+            error
+        })
+    }
+}
+
+//Booking Availability 
+const bookingAvailabilityController=async(req,res)=>{
+    try{
+        const date=moment(req.body.date,'DD-MM-YYYY').toISOString()
+        const fromTime=moment(req.body.time,'HH:mm').subtract(1,'hours').toISOString()
+        const toTime=moment(req.body.time,'HH:mm').add(1,'hours').toISOString()
+        const doctorId=req.body.doctorId
+        const appointments=await appointmentModel.find({doctorId,date,time:{
+            $gte:fromTime,$lte:toTime 
+        }})
+        if(appointments.length>0){
+            return res.status(200).send({
+                message:'Appointment Not Available At This Time',
+                success:true,
+            })
+        }
+        else{
+            return res.status(200).send({
+                success:true,
+                message:'Appointments Available'
+            })
+        }
+    }
+    catch(error){
+        console.log(error)
+        res.status(500).send({
+            success:false,
+            error,
+            message:'Error in Booking'
+        })
+    }
+}
+
+//Appointment List
+const userAppointmentsContoller=async(req,res)=>{
+    try{
+        const appointments = await appointmentModel.find({userId:req.body.userId})
+        res.status(200).send({
+            success:true,
+            message:'Users Appointments Fetch Successfully',
+            data:appointments 
+        })
+    }
+    catch(error){
+        console.log(error)
+        res.status(500).send({
+            success:false,
+            error,
+            message:'Error in User Appointments'
+        })
+    }
+}
+
+
+
+module.exports={loginController,
+    registerController,
+    authController,
+    applyDoctorController,
+    getAllNotificationController,
+    deleteAllNotificationController,
+    getallDoctorsCtrl,
+    bookAppointmentController,
+    bookingAvailabilityController,
+    userAppointmentsContoller}

@@ -5,11 +5,11 @@ const doctorSchema = new mongoose.Schema({
     },
     firstName:{
         type:String,
-        required:[true,'first name is required']
+        required:[true,'First name is required']
     },
     lastName:{
         type:String,
-        required:[true,'last name is required']
+        required:[true,'Last name is required']
     },
     phone:{
         type:String,
@@ -32,11 +32,11 @@ const doctorSchema = new mongoose.Schema({
     },
     experiance:{
         type:String,
-        required:[true,'expericance is required']
+        required:[true,'Expericance is required']
     },
     feePerCunsaltation:{
         type:Number,
-        required:[true,'fee is required']
+        required:[true,'Fee is required']
     },
     status:{
         type:String,

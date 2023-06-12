@@ -4,8 +4,8 @@ import { adminMenu, userMenu } from './../Data/data'
 import {Link ,useLocation,useNavigate} from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import {message,Badge} from 'antd'
-// let SidebarMenu 
 
+// let SidebarMenu 
 const Layout = ({children}) => {
   const {user} = useSelector((state) => state.user);
   const location = useLocation();
@@ -26,7 +26,7 @@ const doctorMenu =[
   },
   {
       name:'Appointments',
-      path:'/appointments',
+      path:'/doctor-appointments',
       icon:'fa-solid fa-list'
   },
   {
@@ -42,8 +42,8 @@ const doctorMenu =[
 const SidebarMenu = user?.isAdmin
 ? adminMenu 
 : user?.isDoctor
-? doctorMenu
-:userMenu;
+? (doctorMenu)
+:(userMenu);
 
   return (
     <>

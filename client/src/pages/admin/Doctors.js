@@ -65,7 +65,7 @@ const columns=[
         dataIndex:'action',
         render:(text,record)=>(
             <div className='d-flex'>
-                {record.status==='pending'?(<button className='btn btn-success' onClick={()=>{handleAccountStatus(record,'approve')}}>Approve</button>) 
+                {record.status==='pending'?(<button className='btn btn-success' onClick={()=>{handleAccountStatus(record,'approved')}}>Approve</button>) 
                 : (<button className='btn btn-danger'>Reject</button>)}
             </div>
         )

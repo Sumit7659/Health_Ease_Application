@@ -2,10 +2,10 @@ import axios from 'axios'
 import Layout from '../../components/Layout'
 import React, { useEffect, useState } from 'react'
 import { useParams,useNavigate  } from 'react-router-dom'
-import {Col, Form, Row,Input,message} from 'antd'
+import {Col, Form, Row,Input,message,TimePicker} from 'antd'
 import {useDispatch,useSelector} from 'react-redux'
 import { hideLoading, showLoading } from '../../redux/features/alertSlice'
-
+import moment from 'moment'
 
 const Profile = () => {
     const {user}=useSelector(state=>state.user)
@@ -19,7 +19,11 @@ const Profile = () => {
         try{
           dispatch(showLoading())
           const res= await axios.post('/api/v1/doctor/updateProfile',
-          {...values,userId:user._id},
+          {...values,userId:user._id,
+          timings:[
+            moment(values.timings[0]).format('HH:mm'),
+            moment(values.timings[1]).format('HH:mm')
+          ]},
           {headers:{
             Authorization:`Bearer ${localStorage.getItem('token')}` 
           }})
@@ -64,7 +68,9 @@ const Profile = () => {
     <Layout>
       <h1>Manage Profile</h1>
       {doctor && (
-        <Form layout='vertical' onFinish={handleFinish} className='m-3' initialValues={doctor}>
+        <Form layout='vertical' onFinish={handleFinish} className='m-3' initialValues={{
+          ...doctor,timings:[moment(doctor.timings[0],'HH:mm'),moment(doctor.timings[0],'HH:mm')]
+        }}>
         <h4>Personal Details:</h4>
         <Row gutter={20}>
           <Col xs={24} md={24} lg={8}>
@@ -122,12 +128,12 @@ const Profile = () => {
             </Form.Item>
             </Col>
             
-            {/* <Col xs={24} md={24} lg={8}>
+            <Col xs={24} md={24} lg={8}>
             <Form.Item label='Timing' name='timings' required rules={[{required:true}]}>
               <TimePicker.RangePicker format='HH:mm'/>
             </Form.Item>
             </Col>
-            <Col xs={24} md={24} lg={8}></Col> */}
+            <Col xs={24} md={24} lg={8}></Col>
             <Col xs={24} md={24} lg={8}><button className='btn btn-primary form-btn' type='submit'>Update</button></Col>
         </Row>
         </Form>

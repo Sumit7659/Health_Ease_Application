@@ -1,18 +1,26 @@
-import React,{useEffect} from 'react'
+import React,{useEffect,useState} from 'react'
 import axios from 'axios'
 import Layout from '../components/Layout.js'
+import { Row } from 'antd'
+import DoctorList from '../components/DoctorList.js'
 
 const HomePage= ()=>{
+
+  const [doctors,setDoctors]=useState([])
 
   //login User data
   const getUserData=async()=>{
     try{
-      await axios.post('/api/v1/user/getUserData',{},{
+      const res = await axios.get('/api/v1/user/getAllDoctors',{
         headers:{
           Authorization:"Bearer " +localStorage.getItem('token')
         }
       })
+      if(res.data.success){
+        setDoctors(res.data.data)
+      }
     }
+    
     catch(error){
       console.log(error)
     }
@@ -23,7 +31,13 @@ useEffect(()=>{
 },[])
   return (
     <Layout>
-    <h1>Home page</h1>
+    <h1 className='text-center'>Home page</h1>
+    <Row>
+      {doctors && doctors.map(doctor=>(
+        <DoctorList doctor={doctor}/>
+      ))}
+    </Row>
+
     </Layout>
   )
 }

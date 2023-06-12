@@ -14,7 +14,7 @@ const getAllUsersController=async(req,res)=>{
         console.log(error)
         res.status(500).send({
             success:false,
-            message:'error while fetching Users',
+            message:'Error while fetching Users',
             error,
         })
     }
@@ -25,7 +25,7 @@ const getAllDoctorsController=async(req,res)=>{
         const doctors =await doctorModel.find({})
         res.status(200).send({
             success:true,
-            message:'doctors data list',
+            message:'Doctors Data List',
             data:doctors,
         })
     }
@@ -33,7 +33,7 @@ const getAllDoctorsController=async(req,res)=>{
         console.log(error),
         res.status(500).send({
             success:false,
-            message:'error while getting Doctor data',
+            message:'Error While Getting Doctor Data',
             error,
         })
     }
@@ -51,7 +51,7 @@ const changeAccountStatusController=async(req,res)=>{
             message:`Your Doctor Account Request has ${status} `,
             onClickPath:'/notification'
         })
-        user.isDoctor=status==='approved'? true: false ;
+        user.isDoctor = status==='approved'? true: false ;
         await user.save();
         res.status(201).send({
             success:true,
